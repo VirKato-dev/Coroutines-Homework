@@ -1,36 +1,20 @@
 package otus.homework.coroutines
 
-import android.util.Log
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
-import java.net.SocketTimeoutException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class CatsPresenter(
-    private val catsService: CatsService
+    private val catsService: CatsService,
+    private val presenterScope: PresenterScope
 ) {
 
     private var _catsView: ICatsView? = null
 
-    suspend fun onInitComplete() {
-        runBlocking {
-            val scope = PresenterScope()
-            val job = scope.async {
-                try {
-                    val response = catsService.getCatFact()
-                    if (response.isSuccessful && response.body() != null) {
-                        _catsView?.populate(response.body() as Fact)
-                    } else {
-
-                    }
-                } catch (t: SocketTimeoutException) {
-                    // Toast.makeText()
-                    Log.e("init", "Не удалось получить ответ от сервером")
-                } catch (t: Throwable) {
-                    CrashMonitor.trackWarning()
-                    t.message?.let { Log.e("init", it) }
-                }
-            }
-            job.join()
+    fun onInitComplete() {
+        presenterScope.launch { // ждём все подзадачи
+            val data = withContext(Dispatchers.IO) { catsService.getCatFact() } // нужен другой поток
+            _catsView?.populate(data)
         }
     }
 

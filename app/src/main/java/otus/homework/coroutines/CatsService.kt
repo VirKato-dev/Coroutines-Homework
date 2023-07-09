@@ -6,5 +6,5 @@ import retrofit2.http.GET
 interface CatsService {
 
     @GET("fact")
-    suspend fun getCatFact(): Response<Fact> // получаем только один факт
+    suspend fun getCatFact(): Fact // получаем только один факт
 }
