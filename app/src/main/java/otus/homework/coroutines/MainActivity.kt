@@ -1,15 +1,13 @@
 package otus.homework.coroutines
 
 import android.os.Bundle
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.coroutines.cancel
+import androidx.lifecycle.ViewModelProvider
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var catsPresenter: CatsPresenter
-
-    private val diContainer = DiContainer()
-    private val presenterScope = PresenterScope()
+    private lateinit var viewModel: CatsViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -17,19 +15,24 @@ class MainActivity : AppCompatActivity() {
         val view = layoutInflater.inflate(R.layout.activity_main, null) as CatsView
         setContentView(view)
 
-        catsPresenter = CatsPresenter(diContainer.service, diContainer.apiPict, presenterScope, this)
-        view.presenter = catsPresenter
-        catsPresenter.attachView(view)
+        viewModel = ViewModelProvider(this)[CatsViewModel::class.java]
+
+        viewModel.factAndPict.observe(this) { fact ->
+            view.populate(fact)
+        }
+
+        findViewById<Button>(R.id.button).setOnClickListener {
+            viewModel.getFactAndPict()
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        catsPresenter.onInitComplete()
+        viewModel.getFactAndPict()
     }
 
     override fun onDestroy() {
-        catsPresenter.detachView()
-        presenterScope.cancel()
+        viewModel.stop()
         super.onDestroy()
     }
 }
