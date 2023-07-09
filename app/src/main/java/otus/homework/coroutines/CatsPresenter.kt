@@ -4,12 +4,15 @@ import android.content.Context
 import android.widget.Toast
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import otus.homework.coroutines.model.FactAndPict
 import java.net.SocketTimeoutException
 
 class CatsPresenter(
     private val catsService: CatsService,
+    private val pictureService: PictureService,
     private val presenterScope: PresenterScope,
     private val context: Context
 ) {
@@ -23,7 +26,9 @@ class CatsPresenter(
             try {
                 val data = withContext(Dispatchers.IO) {
 //                    throw SocketTimeoutException()
-                    catsService.getCatFact()
+                    val fact = async { catsService.getCatFact() }
+                    val pict = async { pictureService.getCatPicture() }
+                    FactAndPict(fact.await(), pict.await()[0].url)
                 } // нужен другой поток
                 _catsView?.populate(data)
             } catch (e: SocketTimeoutException) {

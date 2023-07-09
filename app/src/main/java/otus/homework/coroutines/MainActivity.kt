@@ -17,9 +17,13 @@ class MainActivity : AppCompatActivity() {
         val view = layoutInflater.inflate(R.layout.activity_main, null) as CatsView
         setContentView(view)
 
-        catsPresenter = CatsPresenter(diContainer.service, presenterScope, this)
+        catsPresenter = CatsPresenter(diContainer.service, diContainer.apiPict, presenterScope, this)
         view.presenter = catsPresenter
         catsPresenter.attachView(view)
+    }
+
+    override fun onResume() {
+        super.onResume()
         catsPresenter.onInitComplete()
     }
 
