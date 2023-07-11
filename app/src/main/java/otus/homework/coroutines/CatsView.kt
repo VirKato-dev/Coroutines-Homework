@@ -20,8 +20,3 @@ class CatsView @JvmOverloads constructor(
             .into(findViewById<ImageView>(R.id.fact_imageView))
     }
 }
-
-interface ICatsView {
-
-    fun populate(fact: FactAndPict)
-}
